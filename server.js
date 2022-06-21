@@ -7,22 +7,22 @@ PORT = 8000
 
 let db,
     dbConnectionStr = process.env.DB_STRING,
-    dbName = 'sample_mflix',
+    dbName = "sample_mflix",
     collection
 
 MongoClient.connect(dbConnectionStr)
   .then(client => {
     console.log(`Connected to databse`)
     db = client.db(dbName)
-    collection = db.collection('movies')
+    collection = db.collection("movies")
   })
 
 app.use(express.urlencoded({extended : true}))
 app.use(express.json())
 app.use(cors())
 
-app.get('/search', async (req, res) => {
-  try{
+app.get("/search", async (req, res) => {
+  try {
     let result = await collection.aggregate([
       {
         "$Search" : {
@@ -44,8 +44,19 @@ app.get('/search', async (req, res) => {
   }
 })
 
+app.get("/get/:id", async (req, res) => {
+  try {
+    let result = await collection.findOne({
+      "_id" : ObjectId(req.params.id)
+    })
+
+    res.send(result)
+  } catch (error){
+    res.status(500).send({message: error.message})
+  }
+})
 
 app.listen(process.env.PORT || PORT, () => {
-  console.log('Server is running')
+  console.log("Server is running")
 })
 
